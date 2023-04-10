@@ -5,11 +5,11 @@
   <title>Komunikator dla osoby niedosłyszącej i niewidzącej</title>
   <style>
     body {
-      font-size: 125px;
+      font-size: 15vh;
       font-family: Verdana, sans-serif;
       font-weight: bold;
-      color: #000000;
-      background-color: #d2f2c2;
+      color: #FFFF00;
+      background-color: #000000;
       text-align: center;
       margin: 0;
       padding: 5px;
@@ -19,7 +19,7 @@
       justify-content: center;
       overflow: hidden;
     }
-
+    
     /* dodana animacja */
     .typing:after {
       content: ".";
@@ -41,38 +41,45 @@
   </style>
 </head>
 <body>
-<div id="text"></div>
-<script>
-  const textDiv = document.getElementById("text");
-  const recognition = new webkitSpeechRecognition() || new SpeechRecognition();
-  recognition.lang = "pl-PL";
-  recognition.interimResults = true;
-  recognition.maxAlternatives = 1;
-  recognition.continuous = true;
+  <div id="text"></div>
+  <script>
+    const textDiv = document.getElementById("text");
+    const recognition = new webkitSpeechRecognition() || new SpeechRecognition();
+    recognition.lang = "pl-PL";
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+    recognition.continuous = true;
 
-  recognition.onresult = (event) => {
-    let interimTranscript = "";
-    let finalTranscript = "";
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      let transcript = event.results[i][0].transcript;
-      if (event.results[i].isFinal) {
-        finalTranscript += transcript;
-      } else {
-        interimTranscript += transcript;
+    recognition.onresult = (event) => {
+      let interimTranscript = "";
+      let finalTranscript = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        let transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript;
+        } else {
+          interimTranscript += transcript;
+        }
       }
-    }
-    textDiv.innerText = finalTranscript || interimTranscript;
-    textDiv.scrollTop = textDiv.scrollHeight;
+      textDiv.innerText = finalTranscript || interimTranscript;
+      textDiv.scrollTop = textDiv.scrollHeight;
 
-    // dodanie klasy dla animacji
-    textDiv.classList.add("typing");
-  };
+      // dodanie klasy dla animacji
+      textDiv.classList.add("typing");
 
-  recognition.onend = () => {
+      // sprawdzenie czy tekst jest większy niż okno przeglądarki
+      while (textDiv.scrollWidth > window.innerWidth || textDiv.scrollHeight > window.innerHeight) {
+        let fontSize = parseInt(window.getComputedStyle(textDiv).getPropertyValue('font-size'));
+        fontSize--;
+        textDiv.style.fontSize = fontSize + 'px';
+      }
+    };
+
+    recognition.onend = () => {
+      recognition.start();
+    };
+
     recognition.start();
-  };
-
-  recognition.start();
-</script>
+  </script>
 </body>
 </html>

@@ -19,20 +19,6 @@
       justify-content: center;
       overflow: hidden;
     }
-
-    .text-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      height: 100%;
-    }
-    
-    .text {
-      font-size: 100%;
-      overflow-y: auto;
-      white-space: nowrap;
-    }
     
     /* dodana animacja */
     .typing:after {
@@ -55,13 +41,9 @@
   </style>
 </head>
 <body>
-  <div class="text-container">
-    <div class="text" id="text"></div>
-  </div>
-  
+  <div id="text"></div>
   <script>
     const textDiv = document.getElementById("text");
-    const textContainer = document.querySelector(".text-container");
     const recognition = new webkitSpeechRecognition() || new SpeechRecognition();
     recognition.lang = "pl-PL";
     recognition.interimResults = true;
@@ -80,15 +62,22 @@
         }
       }
       textDiv.innerText = finalTranscript || interimTranscript;
+      textDiv.scrollTop = textDiv.scrollHeight;
 
       // dodanie klasy dla animacji
       textDiv.classList.add("typing");
 
       // sprawdzenie czy tekst jest większy niż okno przeglądarki
-      while (textContainer.scrollWidth > textContainer.clientWidth || textContainer.scrollHeight > textContainer.clientHeight) {
+      while (textDiv.scrollWidth > window.innerWidth || textDiv.scrollHeight > window.innerHeight) {
         let fontSize = parseInt(window.getComputedStyle(textDiv).getPropertyValue('font-size'));
         fontSize--;
         textDiv.style.fontSize = fontSize + 'px';
+      }
+
+      const lastChar = finalTranscript.slice(-1);
+      const isEndOfSentence = lastChar === "." || lastChar === "?" || lastChar === "!";
+      if (isEndOfSentence) {
+        textDiv.style.fontSize = "25vh";
       }
     };
 

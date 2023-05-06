@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Komunikator dla osoby niedosłyszącej i niewidzącej</title>
+  <style>
+    body {
+      font-size: 25vh;
+      font-family: Verdana, sans-serif;
+      font-weight: bold;
+      color: #FFFF00;
+      background-color: #000000;
+      text-align: center;
+      margin: 0;
+      padding: 5px;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .text-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      height: 100%;
+    }
+    
+    .text {
+      font-size: 100%;
+      overflow-y: auto;
+      white-space: nowrap;
+    }
+    
+    /* dodana animacja */
+    .typing:after {
+      content: ".";
+      display: inline-block;
+      animation: blink 0.7s infinite;
+    }
+
+    @keyframes blink {
+      0% {
+        opacity: 0;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="text-container">
+    <div class="text" id="text"></div>
+  </div>
+  
+  <script>
+    const textDiv = document.getElementById("text");
+    const textContainer = document.querySelector(".text-container");
+    const recognition = new webkitSpeechRecognition() || new SpeechRecognition();
+    recognition.lang = "pl-PL";
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+    recognition.continuous = true;
+
+    recognition.onresult = (event) => {
+      let interimTranscript = "";
+      let finalTranscript = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        let transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript;
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+      textDiv.innerText = finalTranscript || interimTranscript;
+
+      // dodanie klasy dla animacji
+      textDiv.classList.add("typing");
+
+      // sprawdzenie czy tekst jest większy niż okno przeglądarki
+      while (textContainer.scrollWidth > textContainer.clientWidth || textContainer.scrollHeight > textContainer.clientHeight) {
+        let fontSize = parseInt(window.getComputedStyle(textDiv).getPropertyValue('font-size'));
+        fontSize--;
+        textDiv.style.fontSize = fontSize + 'px';
+      }
+    };
+
+    recognition.onend = () => {
+      recognition.start();
+    };
+
+    recognition.start();
+  </script>
+</body>
+</html>
